@@ -26,8 +26,10 @@ curl_setopt_array($curl, [
     ]),
 ]);
 
-$response = json_decode(curl_exec($curl));
+$retult = json_decode(curl_exec($curl));
 
 curl_close($curl);
 
+print_r($retult);
+?>
 

@@ -1,38 +1,70 @@
-<button id="linkButton">Open Link - Institution Select</button>
+<button id="link-button" type="button">Link Account</button>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>
 <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
-<script>
-  (async function(){
-    var linkHandler = Plaid.create({
-      // Make a request to your server to fetch a new link_token.
-      token: (await $.post('/create_link_token')).link_token,
-      onSuccess: function(public_token, metadata) {
-        // The onSuccess function is called when the user has successfully
-        // authenticated and selected an account to use.
-        //
-        // When called, you will send the public_token and the selected accounts,
-        // metadata.accounts, to your backend app server.
-        sendDataToBackendServer({
-           public_token: public_token,
-           accounts: metadata.accounts
-        });
-      },
-      onExit: function(err, metadata) {
-        // The user exited the Link flow.
-        if (err != null) {
-            // The user encountered a Plaid API error prior to exiting.
-        }
-        // metadata contains information about the institution
-        // that the user selected and the most recent API request IDs.
-        // Storing this information can be helpful for support.
-      },
-    });
-  })();
+<script type="text/javascript">
+    (async function($) {
+      var handler = Plaid.create({
+        // Call a server-side handler to create a new link_token to initialize Link
+        //    Sample code and help for creating this server-side handler are included
+        //    in Instruction section #2 of this document
+        token: await $.post('/get_link_token'),
+        onLoad: function() {
+          // Optional, called when the Plaid Link client loads
+        },
+        onSuccess: function(public_token, metadata) {
+          // Build a javascript object that contains the customer profile and payment amount from your payment page
+          var paymentdata = load_paymentdata();
 
-  // Trigger the authentication view
-  document.getElementById('linkButton').onclick = function() {
-    // Link will automatically detect the institution ID
-    // associated with the public token and present the
-    // credential view to your user.
-    linkHandler.open();
-  };
+          // Dynamically add the Plaid metadata to your paymentdata object
+          paymentdata['metadata'] = metadata;
+
+          // Send the paymentdata to your app server 
+          // to submit your tokenized ACH payment transaction.
+          var response = $.post('/process_ach_payment', paymentdata);
+
+          // Handle payment success or failure response to your customer here
+        },
+        onExit: function(err, metadata) {
+          // The user exited the Link flow.
+          if (err != null) {
+            // The user encountered a Plaid API error prior to exiting.
+          }
+          // metadata contains information about the institution
+          // that the user selected and the most recent API request IDs.
+          // Storing this information can be helpful for support.
+        },
+        onEvent: function(eventName, metadata) {
+          // Optionally capture Link flow events, streamed through
+          // this callback as your users connect an Item to Plaid.
+          // For example:
+          // eventName = "TRANSITION_VIEW"
+          // metadata  = {
+          //   link_session_id: "123-abc",
+          //   mfa_type:        "questions",
+          //   timestamp:       "2017-09-14T14:42:19.350Z",
+          //   view_name:       "MFA",
+          // }
+        }
+      });
+      $('#link-button').on('click', function(e) {
+        handler.open();
+      });
+    })(jQuery);
+
+    function load_paymentdata() {
+        // Create a javascript object containing your customer's profile and payment information
+        // with actual data from your form input fields.  The following data is hard-coded for the example.
+
+        var paymentdata = {};
+        paymentdata['customername'] = "Jane Doe";      
+        paymentdata['address1'] = "1234 Some Street";
+        paymentdata['city'] = "Some City";
+        paymentdata['state'] = "FL";
+        paymentdata['zip'] = "12345";
+        paymentdata['email'] = "jamedoe@achq.com";
+        paymentdata['phone'] = "123-456-7890";
+        paymentdata['paymentAmount'] = "200.00";
+
+        return paymentdata;
+    }
 </script>
