@@ -22,11 +22,12 @@ curl_setopt_array($curl, [
         "country_codes" => ["US"],
         "language" => "en",
         "webhook" => "https://achq.reigeeky.com/",
+        "redirect_uri" => "https://achq.reigeeky.com/make_public_token.html"
     ]),
 ]);
 
-$response = curl_exec($curl);
+$response = json_decode(curl_exec($curl));
 
 curl_close($curl);
 
-print_r($response);
+

@@ -13,7 +13,7 @@ curl_setopt_array($curl, [
     CURLOPT_POSTFIELDS => json_encode([
         "client_id" => $client_id,
         "secret" => $secret,
-        "link_token" => "link-sandbox-0ea613bb-60f1-44b5-9872-019558304754"
+        "link_token" => "link-sandbox-bd964420-eed0-4bbd-8cbc-81a1c2d2dc37"
     ]),
 ]);
 
