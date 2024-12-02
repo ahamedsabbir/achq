@@ -21,8 +21,8 @@ curl_setopt_array($curl, [
         "products" => ["auth"],
         "country_codes" => ["US"],
         "language" => "en",
-        "webhook" => "https://achq.reigeeky.com/make_public_token.html",
-        "redirect_uri" => "https://example.com/callback",
+        "webhook" => "https://webhook.sample.com",
+        "redirect_uri" => "https://achq.reigeeky.com/make_public_token.html",
     ]),
 ]);
 
